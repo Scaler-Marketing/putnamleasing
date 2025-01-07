@@ -27,7 +27,7 @@ function createTransition(el, triggerElement, isFirst, isLast) {
         trigger: triggerElement,
         scrub: true,
         start: "top bottom",
-        end: "center center",
+        end: "35% center",
         // markers: true,
         pin: false,
       },
