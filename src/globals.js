@@ -1,4 +1,8 @@
-// import { setLoadingStates } from "./modules/setLoadingStates";
+/* The following plugin is a Club GSAP perk */
+import { DrawSVGPlugin } from "gsap/DrawSVGPlugin";
+gsap.registerPlugin(DrawSVGPlugin);
+
+import { setLoadingStates } from "./modules/setLoadingStates";
 import { setRevealHeading } from "./modules/staggerHeading";
 import { setStaggerText } from "./modules/staggerText";
 import { setStaggerElements } from "./modules/staggerElements";
@@ -10,9 +14,8 @@ import { initMenu } from "./modules/menu";
 // import { initContactForm } from "./modules/contactForm";
 // import { setVideosModal } from "./modules/videoModal";
 
-
 // wait until DOM is ready (html and svg markup)
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
   initMenu();
   // initButtonStates();
   // playVideoOnScroll();
@@ -26,5 +29,5 @@ document.addEventListener("DOMContentLoaded", function() {
 document.fonts.ready.then(() => {
   setStaggerText();
   setRevealHeading();
-  // setLoadingStates();
+  setLoadingStates();
 });
