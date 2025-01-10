@@ -52,18 +52,19 @@ export function setLoadingStates() {
         loading.style.display = "block";
         gsap.to(logoCircle, {
           drawSVG: "0% 100% live",
-          duration: 1,
+          duration: 0.5,
+          delay: 0.5,
           ease: "expo.out",
         });
         gsap.to(logoPath, {
           drawSVG: "0% 100% live",
-          duration: 1,
+          duration: 0.5,
+          delay: 0.5,
           ease: "expo.out",
         });
         gsap.to(loading, {
           maskPosition: "50% 100%",
           duration: 1,
-          delay: 0.5,
           ease: "expo.out",
           onComplete: () => {
             window.location.href = href;

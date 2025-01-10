@@ -1,7 +1,3 @@
-/* The following plugin is a Club GSAP perk */
-import { DrawSVGPlugin } from "gsap/DrawSVGPlugin";
-gsap.registerPlugin(DrawSVGPlugin);
-
 import { setLoadingStates } from "./modules/setLoadingStates";
 import { setRevealHeading } from "./modules/staggerHeading";
 import { setStaggerText } from "./modules/staggerText";

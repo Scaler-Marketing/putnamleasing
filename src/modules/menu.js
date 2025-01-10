@@ -89,4 +89,13 @@ export function initMenu() {
 
     dropdown.addEventListener("click", toggleSubmenu);
   });
+
+  // close the submenu if the user clicks outside of the navbar
+  document.addEventListener("click", (e) => {
+    if (!navbar.contains(e.target)) {
+      dropdownsTimelines.forEach((timeline) => timeline.reverse());
+      currentDropdown?.classList.remove("is-active");
+      currentDropdown = null;
+    }
+  });
 }
