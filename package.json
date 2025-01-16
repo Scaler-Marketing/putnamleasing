@@ -19,6 +19,9 @@
     },
     "lenis": {
       "global": "lenis"
+    },
+    "swiper": {
+      "global": "Swiper"
     }
   }
 }
