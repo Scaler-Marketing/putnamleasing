@@ -2,7 +2,7 @@ import { setLoadingStates } from "./modules/setLoadingStates";
 import { setRevealHeading } from "./modules/staggerHeading";
 import { setStaggerText } from "./modules/staggerText";
 import { setStaggerElements } from "./modules/staggerElements";
-// import { initButtonStates } from "./modules/buttonStates";
+import { initButtons } from "./modules/buttons";
 // import { playVideoOnScroll, setTransparentVideo } from "./modules/playVideoOnScroll";
 import { initMenu } from "./modules/menu";
 // import { setImageMasks } from "./modules/setImageMasks";
@@ -13,7 +13,7 @@ import { initMenu } from "./modules/menu";
 // wait until DOM is ready (html and svg markup)
 document.addEventListener("DOMContentLoaded", function () {
   initMenu();
-  // initButtonStates();
+  initButtons();
   // playVideoOnScroll();
   // setImageMasks();
   setStaggerElements();

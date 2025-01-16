@@ -72,8 +72,6 @@ function setupCarGallery(carGallerySource) {
   // get the JSON values from the car gallery source
   const items = getJSONValues(carGallerySource);
 
-  console.log(items);
-
   // if there are no items, return early
   if (!items) {
     return;
@@ -127,7 +125,7 @@ function getJSONValues(el) {
       // Parse the JSON string into a JavaScript object
       const jsonObject = JSON.parse(jsonString);
 
-      console.log("Extracted JSON Object:", jsonObject);
+      // console.log("Extracted JSON Object:", jsonObject);
 
       return jsonObject.items;
 
