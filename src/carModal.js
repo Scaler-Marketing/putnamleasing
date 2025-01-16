@@ -72,6 +72,8 @@ function setupCarGallery(carGallerySource) {
   // get the JSON values from the car gallery source
   const items = getJSONValues(carGallerySource);
 
+  console.log(items);
+
   // if there are no items, return early
   if (!items) {
     return;
@@ -87,6 +89,15 @@ function setupCarGallery(carGallerySource) {
     watchSlidesProgress: true,
     watchOverflow: true,
   });
+
+  items.forEach((item) => {
+    thumbs.appendSlide(
+      `<div class="swiper-slide car-gallery_thumb-wrapper"><img src="${item.url}" class="car-gallery_thumb"></div>`
+    );
+  });
+
+  thumbs.update();
+
   const gallery = new Swiper(".swiper.car-gallery_imgs", {
     effect: "fade",
     thumbs: {
@@ -94,13 +105,12 @@ function setupCarGallery(carGallerySource) {
     },
   });
 
-  // add the items to the Swiper instances
   items.forEach((item) => {
-    thumbs.appendSlide(`<div class="swiper-slide car-gallery_thumb-wrapper"><img src="${item.url}" class="car-gallery_thumb"></div>`);
     gallery.appendSlide(
       `<div class="swiper-slide car-gallery_img-wrapper"><img src="${item.url}" class="car-gallery_img"></div>`
     );
   });
+  gallery.update();
 }
 
 function getJSONValues(el) {
