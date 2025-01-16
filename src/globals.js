@@ -8,7 +8,7 @@ import { initMenu } from "./modules/menu";
 // import { setImageMasks } from "./modules/setImageMasks";
 // import { initFormSubmit } from "./modules/formSubmit";
 // import { initContactForm } from "./modules/contactForm";
-// import { setVideosModal } from "./modules/videoModal";
+import { setVideosModal } from "./modules/videoModal";
 
 // wait until DOM is ready (html and svg markup)
 document.addEventListener("DOMContentLoaded", function () {
@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
   setStaggerElements();
   // initFormSubmit();
   // initContactForm();
-  // setVideosModal();
+  setVideosModal();
 });
 
 document.fonts.ready.then(() => {
