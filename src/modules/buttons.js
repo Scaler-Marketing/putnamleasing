@@ -4,8 +4,6 @@ export function initButtons() {
     // if button doesn't include a .button_icon, return
     if (!button.querySelector('.button_icon')) return;
 
-    console.log('button', button);
-
     // use GSAP + DrawSVG plugin to animate the button icon path with mouse hover
     const icon = button.querySelector('.button_icon');
     const path = icon.querySelector('path');
