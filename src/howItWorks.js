@@ -1,18 +1,20 @@
 function setHowItWorksSections() {
-  const mm = gsap.matchMedia(); // Create a matchMedia instance
+  let mm = gsap.matchMedia(); // Create a matchMedia instance
 
-  mm.add({
-    // Breakpoint for desktop
-    "(min-width: 992px)": () => {
-      console.log("Desktop breakpoint active");
-      initializeSections(".how-it-works_mask_desktop", false);
+  mm.add(
+    {
+      small: '(max-width: 991px)',
+      large: '(min-width: 992px)',
     },
-    // Breakpoint for mobile
-    "(max-width: 991px)": () => {
-      console.log("Mobile breakpoint active");
-      initializeSections(".how-it-works_mask_mobile", true);
-    },
-  });
+    (ctx) => {  
+      if (ctx.conditions.small) {
+        initializeSections(".image-mask_mobile", true);
+      }
+      if (ctx.conditions.large){
+        initializeSections(".image-mask_desktop", false);
+      }
+    }
+  );
 
   function initializeSections(maskSelector, isMobile) {
     const howItWorksSections = document.querySelectorAll(
@@ -28,28 +30,28 @@ function setHowItWorksSections() {
       const mask = howItWorksMasks[i];
       const maskPath = mask.querySelector("path");
 
-      // Initial setup for paths
-      gsap.set(maskPath, { drawSVG: "0% 100%" });
-
-      // Timeline for mask animation
-      const maskTl = gsap.timeline({
-        paused: true,
-      });
-
-      maskTl.to(maskPath, {
-        drawSVG: "100% 0%",
-        duration: 1,
-        ease: "expo.inOut",
-      });
-
       if (isMobile) {
         // Mobile: Only trigger onEnter and only once
+        // Initial setup for paths
+        gsap.set(maskPath, { drawSVG: "0%" });
+
+        // Timeline for mask animation
+        const maskTl = gsap.timeline({
+          paused: true,
+        });
+
+        maskTl.to(maskPath, {
+          drawSVG: "100%%",
+          duration: 1,
+          ease: "expo.inOut",
+        });
+
         gsap.timeline({
           scrollTrigger: {
             trigger: section,
             start: "top 60%",
             end: "bottom 60%",
-            markers: true,
+            // markers: true,
             once: true, // Ensure it only runs once
             onEnter: () => {
               maskTl.play();
@@ -60,6 +62,29 @@ function setHowItWorksSections() {
         // Desktop: Full ScrollTrigger behavior
         const isFirst = i === 0;
         const isLast = i === howItWorksSections.length - 1;
+
+        // Initial setup for paths
+        gsap.set(maskPath, { drawSVG: "100% 100%" });
+
+        // Timeline for mask animation
+        const maskTl = gsap.timeline({
+          paused: true,
+        });
+
+        maskTl.to(maskPath, {
+          drawSVG: "100% 0%",
+          duration: 1,
+          ease: "expo.inOut",
+        });
+        maskTl.set(maskPath, { drawSVG: "0% 100%" });
+        maskTl.to(maskPath, {
+          drawSVG: "0% 0%",
+          duration: 1,
+          ease: "expo.inOut",
+        });
+
+        maskTl.addLabel("out", 1);
+        maskTl.addPause(1);
 
         const sectionTl = gsap.timeline({
           scrollTrigger: {
@@ -98,7 +123,6 @@ function setHowItWorksSections() {
 
   // Cleanup and reinitialize logic on breakpoint change
   mm.add("*", () => {
-    console.log("Reverting previous logic");
     mm.revert(); // Clean up GSAP timelines and ScrollTriggers before reinitializing
   });
 }
