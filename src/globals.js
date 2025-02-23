@@ -5,7 +5,7 @@ import { setStaggerElements } from "./modules/staggerElements";
 import { initButtons } from "./modules/buttons";
 import { initMenu } from "./modules/menu";
 import { setPathAnimations } from "./modules/setPathAnimation";
-// import { initFormSubmit } from "./modules/formSubmit";
+import { initFormSubmit } from "./modules/formSubmit";
 // import { initContactForm } from "./modules/contactForm";
 import { setVideosModal } from "./modules/videoModal";
 
@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function () {
   initButtons();
   setStaggerElements();
   setPathAnimations();
-  // initFormSubmit();
+  initFormSubmit();
   // initContactForm();
   setVideosModal();
 });

@@ -41,6 +41,7 @@ export function initMenu() {
 
   dropdowns.forEach((dropdown, i) => {
     const submenu = dropdown.nextElementSibling;
+    const icon = dropdown.querySelector(".navbar_link-icon");
 
     if (!submenu) {
       return;
@@ -58,6 +59,14 @@ export function initMenu() {
       { height: 0 },
       { height: "auto", duration: 0.5, ease: "expo.inOut" }
     );
+
+    if (icon) {
+      submenuTl.to(icon, {
+        rotate: -180,
+        duration: 0.5,
+        ease: "expo.inOut",
+      }, 0);
+    }
 
     if (submenu.querySelector(".big-links_list")) {
       submenuTl.from(

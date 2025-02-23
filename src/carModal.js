@@ -1,19 +1,15 @@
-function initCarModal() {
-  const carModal = document.querySelector(".car-modal");
-  const carModalGallery = document.querySelector(".car-gallery_imgs");
-  const carModalThumbs = document.querySelector(".car-gallery_thumbs");
-
-  const carModalClose = document.querySelector(".car-modal_close");
-  const carModalTrigger = document.querySelector(".car-modal_trigger");
-  
-  const carGallerySource = document.querySelector(".car-gallery_source");
+function initCarModal(carModal, carModalTrigger) {
+  const carModalGallery = carModal.querySelector(".car-gallery_imgs");
+  const carModalThumbs = carModal.querySelector(".car-gallery_thumbs");
+  const carModalClose = carModal.querySelector(".car-modal_close");
+  const carGallerySource = carModal.querySelector(".car-gallery_source");
 
   if (!carModal || !carGallerySource) {
     console.error("One or more required elements are missing.");
     return;
   }
 
-  setupCarGallery(carGallerySource);
+  setupCarGallery(carGallerySource, carModalThumbs, carModalGallery);
 
   // setup car modal gsap timeline
   const carModalTl = gsap.timeline({
@@ -26,34 +22,35 @@ function initCarModal() {
     },
   });
 
-  carModalTl.fromTo(
-    carModal,
-    { maskPosition: "0% 0%" },
-    { maskPosition: "50% 0%", duration: 1, ease: "expo.inOut" }
-  )
-  .fromTo(
-    carModalClose,
-    { y: "-8rem" },
-    { y: "0rem", duration: 1, ease: "expo.inOut" },
-    0.5
-  )
-  .fromTo(
-    carModalGallery,
-    { opacity: 0 },
-    { opacity: 1, duration: 1, ease: "expo.inOut" },
-    .5
-  )
-  .fromTo(
-    carModalThumbs.querySelectorAll(".car-gallery_thumb-wrapper"),
-    { y: "12rem" },
-    {
-      y: "0rem",
-      duration: 1,
-      stagger: 0.01,
-      ease: "expo.inOut"
-    },
-    .5
-  );
+  carModalTl
+    .fromTo(
+      carModal,
+      { maskPosition: "0% 0%" },
+      { maskPosition: "50% 0%", duration: 1, ease: "expo.inOut" }
+    )
+    .fromTo(
+      carModalClose,
+      { y: "-8rem" },
+      { y: "0rem", duration: 1, ease: "expo.inOut" },
+      0.5
+    )
+    .fromTo(
+      carModalGallery,
+      { opacity: 0 },
+      { opacity: 1, duration: 1, ease: "expo.inOut" },
+      0.5
+    )
+    .fromTo(
+      carModalThumbs.querySelectorAll(".car-gallery_thumb-wrapper"),
+      { y: "12rem" },
+      {
+        y: "0rem",
+        duration: 1,
+        stagger: 0.01,
+        ease: "expo.inOut",
+      },
+      0.5
+    );
 
   carModalTrigger.addEventListener("click", () => {
     if (carModalTl.progress() === 1) {
@@ -68,7 +65,7 @@ function initCarModal() {
   });
 }
 
-function setupCarGallery(carGallerySource) {
+function setupCarGallery(carGallerySource, thumbsEl, galleryEl) {
   // get the JSON values from the car gallery source
   const items = getJSONValues(carGallerySource);
 
@@ -78,7 +75,7 @@ function setupCarGallery(carGallerySource) {
   }
 
   // create a new Swiper instances
-  const thumbs = new Swiper(".swiper.car-gallery_thumbs", {
+  const thumbs = new Swiper(thumbsEl, {
     spaceBetween: 16,
     slidesOffsetBefore: 24,
     slidesOffsetAfter: 24,
@@ -96,7 +93,7 @@ function setupCarGallery(carGallerySource) {
 
   thumbs.update();
 
-  const gallery = new Swiper(".swiper.car-gallery_imgs", {
+  const gallery = new Swiper(galleryEl, {
     effect: "fade",
     thumbs: {
       swiper: thumbs,
@@ -140,4 +137,32 @@ function getJSONValues(el) {
   }
 }
 
-document.addEventListener("DOMContentLoaded", initCarModal);
+function initCarModals() {
+  const carModals = document.querySelectorAll(".car-modal");
+
+  if (!carModals) {
+    console.error("No car modals found.");
+    return;
+  }
+
+  carModals.forEach((carModal) => {
+    // get car modal id
+    const carModalId = carModal.dataset.carId;
+
+    if (!carModalId) {
+      console.error("No car id found.");
+      return;
+    }
+
+    const trigger = document.querySelector(`[data-car-target="${carModalId}"]`);
+
+    if (!trigger) {
+      console.error("No trigger found.");
+      return;
+    }
+
+    initCarModal(carModal, trigger);
+  });
+}
+
+document.addEventListener("DOMContentLoaded", initCarModals);
