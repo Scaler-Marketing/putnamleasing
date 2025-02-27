@@ -1,5 +1,4 @@
 function setHowItWorksSections() {
-  console.log("setHowItWorksSections");
   let mm = gsap.matchMedia(); // Create a matchMedia instance
 
   mm.add(
@@ -8,6 +7,9 @@ function setHowItWorksSections() {
       large: '(min-width: 992px)',
     },
     (ctx) => {  
+      if (ctx.conditions.small) {
+        initializeSections(".image-mask_mobile", true);
+      }
       if (ctx.conditions.large){
         initializeSections(".image-mask_desktop", false);
       }
@@ -15,33 +17,31 @@ function setHowItWorksSections() {
   );
 
   function initializeSections(maskSelector, isMobile) {
-    console.log("initializeSections", maskSelector, isMobile);
     const howItWorksSections = document.querySelectorAll(
       ".how-it-works_section"
     );
-    const howItWorksMask = document.querySelector(maskSelector);
+    const howItWorksMasks = document.querySelectorAll(maskSelector);
 
-    if (!howItWorksSections || !howItWorksMask) {
+    if (!howItWorksSections || !howItWorksMasks) {
       return;
     }
 
-    howItWorksSections.forEach((section, i) => {  
-      console.log(howItWorksMask, howItWorksMask.querySelectorAll("img")[i]);
-      const image = howItWorksMask.querySelectorAll("img")[i];
+    howItWorksSections.forEach((section, i) => {
+      const mask = howItWorksMasks[i];
+      const maskPath = mask.querySelector("path");
 
       if (isMobile) {
         // Mobile: Only trigger onEnter and only once
         // Initial setup for paths
-        gsap.set(image, { opacity: 0, scale: 1.1 });
+        gsap.set(maskPath, { drawSVG: "0%" });
 
         // Timeline for mask animation
         const maskTl = gsap.timeline({
           paused: true,
         });
 
-        maskTl.to(image, {
-          opacity: 1,
-          scale: 1,
+        maskTl.to(maskPath, {
+          drawSVG: "100%%",
           duration: 1,
           ease: "expo.inOut",
         });
@@ -63,21 +63,28 @@ function setHowItWorksSections() {
         const isFirst = i === 0;
         const isLast = i === howItWorksSections.length - 1;
 
-        if (!isFirst) {
-          gsap.set(image, { opacity: 0, scale: 1.1 });
-        }
+        // Initial setup for paths
+        gsap.set(maskPath, { drawSVG: "100% 100%" });
 
         // Timeline for mask animation
         const maskTl = gsap.timeline({
           paused: true,
         });
 
-        maskTl.to(image, {
-          opacity: 1,
-          scale: 1,
+        maskTl.to(maskPath, {
+          drawSVG: "100% 0%",
           duration: 1,
           ease: "expo.inOut",
         });
+        maskTl.set(maskPath, { drawSVG: "0% 100%" });
+        maskTl.to(maskPath, {
+          drawSVG: "0% 0%",
+          duration: 1,
+          ease: "expo.inOut",
+        });
+
+        maskTl.addLabel("out", 1);
+        maskTl.addPause(1);
 
         const sectionTl = gsap.timeline({
           scrollTrigger: {
@@ -93,19 +100,19 @@ function setHowItWorksSections() {
                 maskTl.play();
               }
             },
-            // onEnterBack: () => {
-            //   if (!isLast) {
-            //     maskTl.progress(1).reverse();
-            //   }
-            // },
-            // onLeave: () => {
-            //   if (!isLast) {
-            //     maskTl.seek("out").play();
-            //   }
-            // },
+            onEnterBack: () => {
+              if (!isLast) {
+                maskTl.progress(1).reverse();
+              }
+            },
+            onLeave: () => {
+              if (!isLast) {
+                maskTl.seek("out").play();
+              }
+            },
             onLeaveBack: () => {
               if (!isFirst) {
-                maskTl.progress(1).reverse();
+                maskTl.seek("out").reverse();
               }
             },
           },
