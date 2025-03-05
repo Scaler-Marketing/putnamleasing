@@ -7,10 +7,13 @@ export function initButtons() {
     // use GSAP + DrawSVG plugin to animate the button icon path with mouse hover
     const icon = button.querySelectorAll('.button_icon');
     const isVertical = button.classList.contains('animate-vertical');
+    const isReverse = button.classList.contains('animate-reverse');
 
     button.addEventListener('mouseenter', () => {
       if (isVertical) {
         gsap.to(icon, { duration: 0.5, y: "100%", ease: 'expo.out' });
+      } else if (isReverse) {
+        gsap.to(icon, { duration: 0.5, x: "-100%", ease: 'expo.out' });
       } else {
         gsap.to(icon, { duration: 0.5, x: "100%", ease: 'expo.out' });
       }
@@ -19,6 +22,8 @@ export function initButtons() {
     button.addEventListener('mouseleave', () => {
       if (isVertical) {
         gsap.to(icon, { duration: 0.5, y: "0%", ease: 'expo.out' });
+      } else if (isReverse) {
+        gsap.to(icon, { duration: 0.5, x: "0%", ease: 'expo.out' });
       } else {
         gsap.to(icon, { duration: 0.5, x: "0%", ease: 'expo.out' });
       }

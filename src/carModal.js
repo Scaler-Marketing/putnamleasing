@@ -83,6 +83,10 @@ function setupCarGallery(carGallerySource, thumbsEl, galleryEl) {
     freeMode: true,
     watchSlidesProgress: true,
     watchOverflow: true,
+    navigation: {
+      nextEl: ".car-gallery_nav.next",
+      prevEl: ".car-gallery_nav.prev",
+    },
   });
 
   items.forEach((item) => {

@@ -92,3 +92,65 @@ function createTransition(el, triggerElement, isFirst, isLast) {
     );
   }
 }
+
+export function setHeroScrollFrame() {
+  const wrapper = document.querySelector(".section_home-header");
+  const stickyEl = document.querySelector(".home-header_sticky");
+  const steps = document.querySelectorAll(".home-header_step");
+  const homeHeader = document.querySelector(".home-header_cta-wrapper");
+
+  const tl = gsap.timeline(
+    {
+      scrollTrigger: {
+        trigger: wrapper,
+        start: "top top",
+        end: "25% center",
+        scrub: true,
+        pin: false,
+      },
+    },
+  )
+
+  tl.to(wrapper, {
+    padding: "2.5rem",
+  });
+  tl.to(stickyEl, {
+    borderRadius: "1rem",
+    height: "calc(100vh - 7rem)",
+    top: "5rem"
+  }, 0);
+  tl.to(steps, {
+    height: "calc(100vh - 7rem)",
+    paddingTop: "5rem",
+  }, 0);
+  tl.to(homeHeader, {
+    height: "calc(100vh - 7rem)",
+    paddingTop: "5rem",
+  }, 0);
+
+  // logic for the bullet points
+  const bullets = document.querySelectorAll(".home-header_bullet");
+  const spacers = document.querySelectorAll(".home-header_spacer");
+
+  console.log(bullets, spacers);
+
+  if (!bullets || !spacers) {
+    return;
+  }
+
+  bullets.forEach((el, i) => {
+    const progressEl = el.querySelector(".home-header_bullet-progress");
+    const spacer = spacers[i];
+
+    gsap.to(progressEl, {
+      scaleX: 1,
+      scrollTrigger: {
+        trigger: spacer,
+        start: "top bottom",
+        end: "top top",
+        scrub: true,
+        pin: false,
+      },
+    });
+  });
+}
