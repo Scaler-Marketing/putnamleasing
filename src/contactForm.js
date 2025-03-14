@@ -2,7 +2,7 @@ document.addEventListener("alpine:init", () => {
   Alpine.data("contactForm", () => ({
     step: 0,
     carMaker: null,
-    leasePurpose: null,
+    carModel: null,
     leaseTerms: null,
     budgetMin: null,
     budgetMax: null,
@@ -60,9 +60,18 @@ document.addEventListener("alpine:init", () => {
       }
       return this.carMakers.find(carMaker => carMaker.name === this.carMaker);
     },
+    carName() {
+      if (!this.carMaker && !this.carModel) {
+        return null;
+      }
+      if (!this.carModel) {
+        return this.carMaker;
+      }
+      return `${this.carMaker} ${this.carModel}`;
+    },
     checkConditions(index) {
       if (index === 0) {
-        return this.carMaker && this.leasePurpose && this.budgetRange() && this.leaseTerms;
+        return this.carMaker && this.budgetRange() && this.leaseTerms;
       }
 
       if (index === 1) {
