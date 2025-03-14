@@ -28,10 +28,14 @@ document.addEventListener("alpine:init", () => {
           src: item.querySelector("[data-car-makers-img]").src
         });
 
+        console.log(item, item.querySelector("[data-car-makers-name]"), text);
+
         // add an <option> tag with the car maker name as a value inside the select element
         const option = document.createElement("option");
         option.value = text;
         option.textContent = text;
+        console.log(option);
+        makerSelect.appendChild(option);
       });
     },
     nextStep(index) {
