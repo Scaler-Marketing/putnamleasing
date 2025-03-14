@@ -14,6 +14,7 @@ document.addEventListener("alpine:init", () => {
     carMakers: [],
     init() {
       const list = document.querySelector("[data-car-makers-list]");
+      const makerSelect = document.querySelector("[data-car-makers-select]");
 
       if (!list) {
         return;
@@ -21,10 +22,16 @@ document.addEventListener("alpine:init", () => {
 
       const items = list.querySelectorAll("[data-car-makers-item]");
       items.forEach(item => {
+        const text = item.querySelector("[data-car-makers-name]").textContent;
         this.carMakers.push({
-          name: item.querySelector("[data-car-makers-name]").textContent,
+          name: text,
           src: item.querySelector("[data-car-makers-img]").src
         });
+
+        // add an <option> tag with the car maker name as a value inside the select element
+        const option = document.createElement("option");
+        option.value = text;
+        option.textContent = text;
       });
     },
     nextStep(index) {
