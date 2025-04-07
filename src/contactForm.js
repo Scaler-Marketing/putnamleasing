@@ -28,11 +28,15 @@ document.addEventListener("alpine:init", () => {
           src: item.querySelector("[data-car-makers-img]").src
         });
 
+        this.carMakers.push({
+          name: "Other",
+          src: "https://cdn.prod.website-files.com/6753a0e3806a91abd09e22a2/67f3c46f635f04bd4522d1e7_putnam-others-option.svg",
+        });
+
         // add an <option> tag with the car maker name as a value inside the select element
         const option = document.createElement("option");
         option.value = text;
         option.textContent = text;
-        console.log(option);
         makerSelect.appendChild(option);
       });
     },
