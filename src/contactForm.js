@@ -21,16 +21,11 @@ document.addEventListener("alpine:init", () => {
       }
 
       const items = list.querySelectorAll("[data-car-makers-item]");
-      items.forEach(item => {
+      items.forEach((item) => {
         const text = item.querySelector("[data-car-makers-name]").textContent;
         this.carMakers.push({
           name: text,
-          src: item.querySelector("[data-car-makers-img]").src
-        });
-
-        this.carMakers.push({
-          name: "Other",
-          src: "https://cdn.prod.website-files.com/6753a0e3806a91abd09e22a2/67f3c46f635f04bd4522d1e7_putnam-others-option.svg",
+          src: item.querySelector("[data-car-makers-img]").src,
         });
 
         // add an <option> tag with the car maker name as a value inside the select element
@@ -39,6 +34,17 @@ document.addEventListener("alpine:init", () => {
         option.textContent = text;
         makerSelect.appendChild(option);
       });
+
+      this.carMakers.push({
+        name: "Other",
+        src: "https://cdn.prod.website-files.com/6753a0e3806a91abd09e22a2/67f3c46f635f04bd4522d1e7_putnam-others-option.svg",
+      });
+
+      // add an <option> tag with the car maker name as a value inside the select element
+      const option = document.createElement("option");
+      option.value = "Other";
+      option.textContent = "Other";
+      makerSelect.appendChild(option);
     },
     nextStep(index) {
       if (this.step < this.totalSteps - 1 && this.checkConditions(0)) {
