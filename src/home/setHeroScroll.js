@@ -112,13 +112,18 @@ export function setHeroScrollFrame() {
   )
 
   tl.to(wrapper, {
-    padding: "2.5rem",
+    padding: window.outerWidth > 767 ? "2.5rem" : "1.25rem",
   });
-  tl.to(stickyEl, {
-    borderRadius: "1rem",
-    height: "calc(100vh - 7rem)",
-    top: "5rem"
-  }, 0);
+  tl.to(
+    stickyEl,
+    {
+      borderRadius: "1rem",
+      height:
+        window.outerWidth > 767 ? "calc(100vh - 7rem)" : "calc(100vh - 8rem)",
+      top: window.outerWidth > 767 ? "5rem" : "6rem",
+    },
+    0
+  );
   tl.to(steps, {
     height: "calc(100vh - 7rem)",
     paddingTop: "5rem",
