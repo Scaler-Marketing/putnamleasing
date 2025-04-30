@@ -40,7 +40,6 @@ export function initHomeSlider() {
               tagName: "span",
             });
             setLinesWrapper(splitter.lines, () => {
-              // only leave the active slide visible
               if (slide !== currentSlide) {
                 gsap.set(splitter.lines, { yPercent: 100 });
               }
@@ -83,28 +82,29 @@ export function initHomeSlider() {
           tagName: "span",
         });
         setLinesWrapper(splitter.lines, () => {
-          // hide all lines first
           gsap.set(splitter.lines, { yPercent: 100 });
         });
       });
     });
 
-    // animate old slide lines out
-    const prevLines = prevSlide.querySelectorAll(".line");
-    gsap.to(prevLines, {
+    // collect line elements
+    const prevLines   = prevSlide.querySelectorAll(".line");
+    const activeLines = activeSlide.querySelectorAll(".line");
+
+    // build a timeline with a gap before the entry animation
+    const tl = gsap.timeline();
+
+    tl.to(prevLines, {
       yPercent: 100,
       duration: 1,
       ease: "expo.out",
-    });
-
-    // animate new slide lines in
-    const activeLines = activeSlide.querySelectorAll(".line");
-    gsap.to(activeLines, {
+    })
+    .to(activeLines, {
       yPercent: 0,
       stagger: 0.05,
       duration: 1,
       ease: "expo.out",
-    });
+    }, "+=0.3"); // <-- pause 0.3s before starting the entry
 
     // refresh triggers if you use ScrollTrigger elsewhere
     if (window.ScrollTrigger) {
