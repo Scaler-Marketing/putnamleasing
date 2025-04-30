@@ -79,6 +79,13 @@ document.addEventListener("alpine:init", () => {
       }
       return this.carMakers.find(carMaker => carMaker.name === this.carMaker);
     },
+    currentCarMakerSrc() {
+      if (!this.carMaker) {
+        return "https://cdn.prod.website-files.com/6753a0e3806a91abd09e22a2/67f3c46f635f04bd4522d1e7_putnam-others-option.svg";
+      }
+      const carMaker = this.carMakers.find(carMaker => carMaker.name === this.carMaker);
+      return carMaker ? carMaker.src : null;
+    },
     carName() {
       if (!this.carMaker && !this.carModel) {
         return null;
