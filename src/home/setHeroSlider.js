@@ -32,7 +32,7 @@ export function initHomeSlider() {
     on: {
       afterInit: function (swiper) {
         const slides = swiper.slides;
-        const currentSlide = swiper[swiper.activeIndex];
+        const currentSlide = slides[swiper.activeIndex];
         
         slides.forEach((slide, i) => {
           const staggerEls = slide.querySelectorAll('[data-hero-stagger]');
