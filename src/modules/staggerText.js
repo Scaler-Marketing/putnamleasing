@@ -1,5 +1,3 @@
-import { setLinesWrapper } from "./setLinesWrapper";
-
 // Link timelines to scroll position
 function createScrollTrigger(triggerElement, elements, start, end, stagger, delay, withScroll) {
   const trigger = {
@@ -20,10 +18,10 @@ function createScrollTrigger(triggerElement, elements, start, end, stagger, dela
       });
     };
 
-    gsap.timeline({ scrollTrigger: trigger });
+    return gsap.timeline({ scrollTrigger: trigger });
   } else {
     trigger.end = end;
-    gsap
+    return gsap
       .timeline({
         scrollTrigger: trigger,
       })
@@ -40,36 +38,52 @@ export function setStaggerText() {
   const textEls = document.querySelectorAll('[stagger-text]');
 
   textEls.forEach((el) => {
-    if (el.classList.contains('w-richtext')) {
-      const staggerTextEls = new SplitType(el.querySelectorAll('p, li, h2, h3'), {
-        types: "lines",
-        tagName: "span",
-      });
-      setLinesWrapper(staggerTextEls.lines, () => {
-        gsap.set(staggerTextEls.lines, { yPercent: 100 });
-      });
-    } else {
-      const staggerTextEls = new SplitType(el, {
-        types: "lines",
-        tagName: "span",
-      });
-      setLinesWrapper(staggerTextEls.lines, () => {
-        gsap.set(staggerTextEls.lines, { yPercent: 100 });
-      });
-    }
-  })
-
-  const textBlocks = document.querySelectorAll("[stagger-text]");
-
-  textBlocks.forEach((el) => {
     el.classList.add("init");
-    const words = el.querySelectorAll(".line"),
-      startVal = el.dataset.startPos || "center bottom",
+    const startVal = el.dataset.startPos || "center bottom",
       endVal = el.dataset.endPos || "bottom center",
       stagger = el.dataset.stagger || 0.05,
       delay = el.dataset.delay || 0,
       withScrollTrigger = el.dataset.withScroll || false;
-    // let tl = gsap.timeline({ paused: true });
-    createScrollTrigger(el, words, startVal, endVal, stagger, delay, withScrollTrigger);
-  });
+
+    if (el.classList.contains('w-richtext')) {
+      const staggerTextEls = SplitText.create(
+        el.querySelectorAll("p, li, h2, h3"),
+        {
+          type: "lines",
+          mask: "lines",
+          autoSplit: true,
+          onSplit: (self) => {
+            gsap.set(self.lines, { yPercent: 100 });
+            return createScrollTrigger(
+              el,
+              self.lines,
+              startVal,
+              endVal,
+              stagger,
+              delay,
+              withScrollTrigger
+            );
+          }
+        }
+      );
+    } else {
+      const staggerTextEls = SplitText.create(el, {
+        type: "lines",
+        mask: "lines",
+        autoSplit: true,
+        onSplit: (self) => {
+          gsap.set(self.lines, { yPercent: 100 });
+          return createScrollTrigger(
+            el,
+            self.lines,
+            startVal,
+            endVal,
+            stagger,
+            delay,
+            withScrollTrigger
+          );
+        },
+      });
+    }
+  })
 }

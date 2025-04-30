@@ -1,5 +1,3 @@
-import { setLinesWrapper } from "../modules/setLinesWrapper";
-
 export function initHomeSlider() {
 
 // 1) Initialize Swiper
@@ -29,6 +27,10 @@ export function initHomeSlider() {
       bulletElement: "div",
       clickable: true,
     },
+    navigation: {
+      nextEl: ".hero-slider_arrows .next",
+      prevEl: ".hero-slider_arrows .prev",
+    },
     on: {
       afterInit: function (swiper) {
         const slides = swiper.slides;
@@ -38,17 +40,17 @@ export function initHomeSlider() {
           const staggerEls = slide.querySelectorAll('[data-hero-stagger]');
 
           staggerEls.forEach((el, i) => {
-            const staggerTextEls = new SplitType(el, {
-              types: "lines",
-              tagName: "span",
-            });
-            setLinesWrapper(staggerTextEls.lines, () => {
-              if (slide !== currentSlide) {
-                gsap.set(staggerTextEls.lines, { yPercent: 100 });
-              }
+            const staggerTextEls = SplitText.create(el, {
+              type: "lines",
+              mask: "lines",
+              linesClass: "line",
+              autoSplit: true,
+              onSplit: (self) => {
+                gsap.set(self.lines, { yPercent: 100 });
+              },
+            });            
             });
           });
-        });
       },
     },
   });
@@ -74,7 +76,6 @@ export function initHomeSlider() {
   }
 
   function handleStaggerText(swiper) {
-    console.log("transitionEnd", swiper);
     const activeSlide = heroSlider.slides[heroSlider.activeIndex];
     const previousSlide = heroSlider.slides[heroSlider.previousIndex];
 
@@ -97,7 +98,6 @@ export function initHomeSlider() {
   }
 
   function handleSlideChange() {
-    console.log("slideChange");
     handleVideo();
     handleStaggerText();
   }    
