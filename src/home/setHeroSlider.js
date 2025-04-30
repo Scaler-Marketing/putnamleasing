@@ -123,3 +123,6 @@ export function initHomeSlider() {
   handleVideo();
   handleStaggerText();
 }
+
+// 🎉 Deployed commit 1a2b3c4d
+console.log("🎉 Running commit 1a2b3c4d");
