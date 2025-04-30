@@ -1,8 +1,8 @@
-import SplitType from "split-type";
 import { setLinesWrapper } from "../modules/setLinesWrapper";
 
 export function initHomeSlider() {
-  // 1) Initialize Swiper
+
+// 1) Initialize Swiper
   const heroSlider = new Swiper(".swiper.home_hero", {
     slidesPerView: 1,
     centeredSlides: true,
@@ -11,6 +11,9 @@ export function initHomeSlider() {
     grabCursor: true,
     simulateTouch: true,
     effect: "creative",
+    // fadeEffect: {
+    //   crossFade: false,
+    // },
     creativeEffect: {
       prev: { shadow: true, translate: ["0%", 0, -1] },
       next: { translate: ["100%", 0, 0] },
@@ -27,21 +30,21 @@ export function initHomeSlider() {
       clickable: true,
     },
     on: {
-      afterInit(swiper) {
+      afterInit: function (swiper) {
         const slides = swiper.slides;
-        const currentSlide = slides[swiper.activeIndex];
+        const currentSlide = swiper[swiper.activeIndex];
+        
+        slides.forEach((slide, i) => {
+          const staggerEls = slide.querySelectorAll('[data-hero-stagger]');
 
-        // initial split & hide off-screen slides
-        slides.forEach((slide) => {
-          slide.querySelectorAll("[data-hero-stagger]").forEach((el) => {
-            SplitType.revert(el);
-            const splitter = new SplitType(el, {
+          staggerEls.forEach((el, i) => {
+            const staggerTextEls = new SplitType(el, {
               types: "lines",
               tagName: "span",
             });
-            setLinesWrapper(splitter.lines, () => {
+            setLinesWrapper(staggerTextEls.lines, () => {
               if (slide !== currentSlide) {
-                gsap.set(splitter.lines, { yPercent: 100 });
+                gsap.set(staggerTextEls.lines, { yPercent: 100 });
               }
             });
           });
@@ -52,10 +55,12 @@ export function initHomeSlider() {
 
   // 2) Pause all videos & play only the active one
   function handleVideo() {
+    // pause every video under the hero slider
     document
       .querySelectorAll(".swiper.home_hero video")
       .forEach((v) => v.pause());
 
+    // find active slide and its video
     const activeSlide = document.querySelector(
       ".swiper.home_hero .swiper-slide-active"
     );
@@ -68,61 +73,65 @@ export function initHomeSlider() {
     vid.play().catch((e) => console.error("Video play failed:", e));
   }
 
-  // 3) Split & animate text on slide transitions
-  function handleStaggerText() {
-    const prevSlide = heroSlider.slides[heroSlider.previousIndex];
+  function handleStaggerText(swiper) {
+    console.log("transitionEnd", swiper);
     const activeSlide = heroSlider.slides[heroSlider.activeIndex];
+    const previousSlide = heroSlider.slides[heroSlider.previousIndex];
 
-    // re-split both slides at their true widths
-    [prevSlide, activeSlide].forEach((slide) => {
-      slide.querySelectorAll("[data-hero-stagger]").forEach((el) => {
-        SplitType.revert(el);
-        const splitter = new SplitType(el, {
-          types: "lines",
-          tagName: "span",
-        });
-        setLinesWrapper(splitter.lines, () => {
-          gsap.set(splitter.lines, { yPercent: 100 });
-        });
-      });
-    });
+    const activeEls = activeSlide.querySelectorAll('[data-hero-stagger] .line');
+    const previousEls = previousSlide.querySelectorAll('[data-hero-stagger] .line');
 
-    // collect line elements
-    const prevLines   = prevSlide.querySelectorAll(".line");
-    const activeLines = activeSlide.querySelectorAll(".line");
-
-    // build a timeline with a gap before the entry animation
-    const tl = gsap.timeline();
-
-    tl.to(prevLines, {
+    gsap.to(previousEls, {
       yPercent: 100,
       duration: 1,
       ease: "expo.out",
-    })
-    .to(activeLines, {
+    });
+    gsap.to(activeEls, {
       yPercent: 0,
       stagger: 0.05,
-      duration: 1,
       ease: "expo.out",
-    }, "+=0.3"); // <-- pause 0.3s before starting the entry
+      duration: 1,
+    });
 
-    // refresh triggers if you use ScrollTrigger elsewhere
-    if (window.ScrollTrigger) {
-      window.ScrollTrigger.refresh();
-    }
+    // updateMask();
   }
 
-  // 4) Hook into Swiper events
-  heroSlider.on("slideChange", handleVideo);
-  heroSlider.on("slideChangeTransitionEnd", () => {
+  function handleSlideChange() {
+    console.log("slideChange");
     handleVideo();
     handleStaggerText();
-  });
+  }    
 
-  // 5) Kick off initial state
-  handleVideo();
-  handleStaggerText();
+  // function updateMask() {
+  //   const activeSlide = heroSlider.slides[heroSlider.activeIndex];
+  //   const previousSlide = heroSlider.slides[heroSlider.previousIndex];
+  //   gsap.fromTo(
+  //     activeSlide,
+  //     {
+  //       maskPosition: "0%",
+  //     },
+  //     {
+  //       maskPosition: "50%",
+  //       duration: 1,
+  //       ease: "expo.out",
+  //       onComplete: () => {
+  //         gsap.set(previousSlide, { maskPosition: "0%" });
+  //       },
+  //     }
+  //   );  
+  // }
+
+  // 3) Hook into Swiper events
+  heroSlider.on("slideChange", handleVideo);
+  heroSlider.on("transitionEnd", handleSlideChange);
+  // heroSlider.on("beforeTransitionStart", () => {
+  //   const activeSlide = heroSlider.slides[heroSlider.activeIndex];
+  //   const previousSlide = heroSlider.slides[heroSlider.previousIndex];
+
+  //   gsap.set(previousSlide, { maskPosition: "50%" });
+  //   gsap.set(activeSlide, { maskPosition: "0%" });
+  // });
+
+  // 4) Kick off initial video state
+  handleSlideChange();    
 }
-
-// 🎉 Deployed commit 1a2b3c4d
-console.log("🎉 Running commit 1a2b3c4d");
