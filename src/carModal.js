@@ -80,6 +80,7 @@ function setupCarGallery(carGallerySource, thumbsEl, galleryEl) {
     slidesOffsetBefore: 24,
     slidesOffsetAfter: 24,
     slidesPerView: "auto",
+    slidesPerGroupAuto: true,
     freeMode: true,
     watchSlidesProgress: true,
     watchOverflow: true,
