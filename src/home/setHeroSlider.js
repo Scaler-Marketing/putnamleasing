@@ -123,7 +123,7 @@ export function initHomeSlider() {
 
   // 3) Hook into Swiper events
   heroSlider.on("slideChange", handleVideo);
-  heroSlider.on("transitionEnd", handleSlideChange);
+  heroSlider.on("slideChangeTransitionEnd", handleSlideChange);
   // heroSlider.on("beforeTransitionStart", () => {
   //   const activeSlide = heroSlider.slides[heroSlider.activeIndex];
   //   const previousSlide = heroSlider.slides[heroSlider.previousIndex];
