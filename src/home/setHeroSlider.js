@@ -1,6 +1,4 @@
 export function initHomeSlider() {
-
-// 1) Initialize Swiper
   const heroSlider = new Swiper(".swiper.home_hero", {
     slidesPerView: 1,
     centeredSlides: true,
@@ -9,9 +7,6 @@ export function initHomeSlider() {
     grabCursor: true,
     simulateTouch: true,
     effect: "creative",
-    // fadeEffect: {
-    //   crossFade: false,
-    // },
     creativeEffect: {
       prev: { shadow: true, translate: ["0%", 0, -1] },
       next: { translate: ["100%", 0, 0] },
@@ -33,14 +28,10 @@ export function initHomeSlider() {
     },
     on: {
       afterInit: function (swiper) {
-        const slides = swiper.slides;
-        const currentSlide = swiper[swiper.activeIndex];
-        
-        slides.forEach((slide, i) => {
-          const staggerEls = slide.querySelectorAll('[data-hero-stagger]');
-
-          staggerEls.forEach((el, i) => {
-            const staggerTextEls = SplitText.create(el, {
+        // Split and hide all lines
+        swiper.slides.forEach((slide) => {
+          slide.querySelectorAll("[data-hero-stagger]").forEach((el) => {
+            SplitText.create(el, {
               type: "lines",
               mask: "lines",
               linesClass: "line",
@@ -48,40 +39,45 @@ export function initHomeSlider() {
               onSplit: (self) => {
                 gsap.set(self.lines, { yPercent: 100 });
               },
-            });            
             });
           });
+        });
+        // Animate in the active slide's text
+        const activeSlide = swiper.slides[swiper.activeIndex];
+        const activeEls = activeSlide.querySelectorAll(
+          "[data-hero-stagger] .line"
+        );
+        gsap.to(activeEls, {
+          yPercent: 0,
+          stagger: 0.05,
+          ease: "expo.out",
+          duration: 1,
+        });
+        // Play video for the initial slide
+        handleVideo();
       },
     },
   });
-
-  // 2) Pause all videos & play only the active one
   function handleVideo() {
-    // pause every video under the hero slider
     document
       .querySelectorAll(".swiper.home_hero video")
       .forEach((v) => v.pause());
-
-    // find active slide and its video
     const activeSlide = document.querySelector(
       ".swiper.home_hero .swiper-slide-active"
     );
     if (!activeSlide) return;
-
     const vid = activeSlide.querySelector("video");
     if (!vid) return;
-
     vid.muted = true;
     vid.play().catch((e) => console.error("Video play failed:", e));
   }
-
-  function handleStaggerText(swiper) {
+  function handleStaggerText() {
     const activeSlide = heroSlider.slides[heroSlider.activeIndex];
     const previousSlide = heroSlider.slides[heroSlider.previousIndex];
-
-    const activeEls = activeSlide.querySelectorAll('[data-hero-stagger] .line');
-    const previousEls = previousSlide.querySelectorAll('[data-hero-stagger] .line');
-
+    const activeEls = activeSlide.querySelectorAll("[data-hero-stagger] .line");
+    const previousEls = previousSlide.querySelectorAll(
+      "[data-hero-stagger] .line"
+    );
     gsap.to(previousEls, {
       yPercent: 100,
       duration: 1,
@@ -93,45 +89,11 @@ export function initHomeSlider() {
       ease: "expo.out",
       duration: 1,
     });
-
-    // updateMask();
   }
-
   function handleSlideChange() {
     handleVideo();
     handleStaggerText();
-  }    
-
-  // function updateMask() {
-  //   const activeSlide = heroSlider.slides[heroSlider.activeIndex];
-  //   const previousSlide = heroSlider.slides[heroSlider.previousIndex];
-  //   gsap.fromTo(
-  //     activeSlide,
-  //     {
-  //       maskPosition: "0%",
-  //     },
-  //     {
-  //       maskPosition: "50%",
-  //       duration: 1,
-  //       ease: "expo.out",
-  //       onComplete: () => {
-  //         gsap.set(previousSlide, { maskPosition: "0%" });
-  //       },
-  //     }
-  //   );  
-  // }
-
-  // 3) Hook into Swiper events
-  heroSlider.on("slideChange", handleVideo);
+  }
+  // Only need to hook into slideChangeTransitionEnd
   heroSlider.on("slideChangeTransitionEnd", handleSlideChange);
-  // heroSlider.on("beforeTransitionStart", () => {
-  //   const activeSlide = heroSlider.slides[heroSlider.activeIndex];
-  //   const previousSlide = heroSlider.slides[heroSlider.previousIndex];
-
-  //   gsap.set(previousSlide, { maskPosition: "50%" });
-  //   gsap.set(activeSlide, { maskPosition: "0%" });
-  // });
-
-  // 4) Kick off initial video state
-  handleSlideChange();    
 }
