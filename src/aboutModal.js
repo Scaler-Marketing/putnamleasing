@@ -2,8 +2,6 @@ function initAboutModal(trigger) {
   const managerId = trigger.getAttribute("data-modal");
   const el = document.querySelector(`[data-id="${managerId}"]`);
 
-  console.log(trigger, managerId, el);
-
   if (!el) {
     return;
   }

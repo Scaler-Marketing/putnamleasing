@@ -65,13 +65,40 @@ document.addEventListener("alpine:init", () => {
       if (!this.budgetMin && !this.budgetMax) {
         return null;
       }
-      if (this.budgetMin && !this.budgetMax) {
-        return `${this.budgetMin}+`;
+      let min, max;
+
+      if (this.budgetMin) {
+        min = parseInt(this.budgetMin.replace(/[^0-9]/g, ""), 10);
+        if (min > 0) {
+          min = min.toLocaleString("en-US", {
+            style: "currency",
+            currency: "USD",
+            minimumFractionDigits: 0,
+          });
+        }
+      } 
+
+      if (this.budgetMax) {
+        max = parseInt(this.budgetMax.replace(/[^0-9]/g, ""), 10);
+        if (max > 0) {
+          max = max.toLocaleString("en-US", {
+            style: "currency",
+            currency: "USD",
+            minimumFractionDigits: 0,
+          });
+        }
       }
-      if (!this.budgetMin && this.budgetMax) {
-        return `0 - ${this.budgetMax}`;
+
+      if (min && !max) {
+        // if budgetMin is greater than 0 and budgetMax is not set, return min+
+        return `${min}+`;
       }
-      return `${this.budgetMin || 0} - ${this.budgetMax || 0}`;
+      if (!min && max) {
+        // if budgetMax is greater than 0 and budgetMin is not set, return max
+        return `0 - ${max}`;
+      }
+      // if both budgetMin and budgetMax are set, return min - max
+      return `${min} - ${max}`;
     },
     currentCarMaker() {
       if (!this.carMaker) {
