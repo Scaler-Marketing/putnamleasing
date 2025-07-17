@@ -3,6 +3,8 @@ document.addEventListener("alpine:init", () => {
     step: 0,
     carMaker: null,
     carModel: null,
+    carYearValue: null,
+    carMileageValue: null,
     leaseTerms: null,
     budgetMin: null,
     budgetMax: null,
@@ -57,7 +59,7 @@ document.addEventListener("alpine:init", () => {
       }
     },
     progressWidth() {
-      return `${(((this.step + 1) / (this.totalSteps)) * 100)
+      return `${(((this.step + 1) / this.totalSteps) * 100)
         .toFixed(2)
         .toString()}%`;
     },
@@ -76,7 +78,7 @@ document.addEventListener("alpine:init", () => {
             minimumFractionDigits: 0,
           });
         }
-      } 
+      }
 
       if (this.budgetMax) {
         max = parseInt(this.budgetMax.replace(/[^0-9]/g, ""), 10);
@@ -104,13 +106,15 @@ document.addEventListener("alpine:init", () => {
       if (!this.carMaker) {
         return null;
       }
-      return this.carMakers.find(carMaker => carMaker.name === this.carMaker);
+      return this.carMakers.find((carMaker) => carMaker.name === this.carMaker);
     },
     currentCarMakerSrc() {
       if (!this.carMaker) {
         return "https://cdn.prod.website-files.com/6753a0e3806a91abd09e22a2/67f3c46f635f04bd4522d1e7_putnam-others-option.svg";
       }
-      const carMaker = this.carMakers.find(carMaker => carMaker.name === this.carMaker);
+      const carMaker = this.carMakers.find(
+        (carMaker) => carMaker.name === this.carMaker
+      );
       return carMaker ? carMaker.src : null;
     },
     carName() {
@@ -122,6 +126,12 @@ document.addEventListener("alpine:init", () => {
       }
       return `${this.carMaker} ${this.carModel}`;
     },
+    carYear() {
+      return this.carYearValue;
+    },
+    carMileage() {
+      return this.carMileageValue;
+    },
     checkConditions(index) {
       if (index === 0) {
         return this.carMaker && this.budgetRange() && this.leaseTerms;
@@ -132,7 +142,7 @@ document.addEventListener("alpine:init", () => {
         const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email);
         return this.firstName && this.lastName && this.email && isEmailValid;
       }
-    }
+    },
   }));
 });
 
@@ -176,7 +186,7 @@ function initContactModal() {
       0.5
     );
 
-  triggers.forEach(trigger => {
+  triggers.forEach((trigger) => {
     trigger.addEventListener("click", () => {
       if (modalTl.progress() === 1) {
         modalTl.reverse();
