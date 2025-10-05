@@ -217,8 +217,8 @@
     });
 
     const formId = form.id || form.className || "unnamed-form";
-    console.log(`✅ Autocomplete disabled for form: ${formId}`);
-    console.log(`📊 Processed ${inputs.length} form elements`);
+    // console.log(`✅ Autocomplete disabled for form: ${formId}`);
+    // console.log(`📊 Processed ${inputs.length} form elements`);
   }
 
   /**
@@ -231,13 +231,13 @@
       forms.forEach((form) => {
         disableFormAutocomplete(form);
       });
-      console.log(
-        `🎯 Found and processed ${forms.length} form(s) with autocomplete="off"`
-      );
+      // console.log(
+      //   `🎯 Found and processed ${forms.length} form(s) with autocomplete="off"`
+      // );
     } else {
-      console.warn(
-        `⚠️ No forms with autocomplete="off" found. Waiting for them to appear...`
-      );
+      // console.warn(
+      //   `⚠️ No forms with autocomplete="off" found. Waiting for them to appear...`
+      // );
 
       // Wait for forms to appear in the DOM
       const observer = new MutationObserver(function (mutations) {
@@ -353,12 +353,9 @@
     // Also inject a second style element as backup
     const backupStyle = document.createElement("style");
     backupStyle.textContent = `
-        /* BACKUP NUCLEAR CSS */
-        * {
-            -webkit-user-modify: read-write-plaintext-only !important;
-        }
-        
-        form[autocomplete="off"] input {
+        /* BACKUP NUCLEAR CSS - Only target form inputs, not all elements */
+        form[autocomplete="off"] input,
+        form[autocomplete="off"] textarea {
             -webkit-user-modify: read-write-plaintext-only !important;
             -webkit-appearance: none !important;
         }
