@@ -1,9 +1,9 @@
 /**
- * ULTRA-AGGRESSIVE Autocomplete/Autosuggestion Disabler
- * Targets ALL forms with autocomplete="off" attribute
+ * Gentle Autocomplete Disabler
+ * Targets forms with autocomplete="off" attribute
  *
- * This script uses EXTREME techniques to ensure browsers don't show
- * autocomplete dropdowns or suggestions on form inputs.
+ * This script uses targeted techniques to disable autocomplete
+ * without interfering with other page functionality.
  */
 
 (function () {
@@ -20,14 +20,14 @@
   }
 
   /**
-   * ULTRA-AGGRESSIVE autocomplete disabling for a single input
+   * Gentle autocomplete disabling for a single input
    */
   function disableInputAutocomplete(input) {
     // Store original attributes
     const originalName = input.name || input.id || "input";
     const originalId = input.id;
 
-    // Set MULTIPLE conflicting autocomplete attributes
+    // Set multiple conflicting autocomplete attributes (aggressive but targeted)
     input.setAttribute("autocomplete", "off");
     input.setAttribute("autocomplete", "new-password");
     input.setAttribute("autocomplete", "nope");
@@ -36,55 +36,37 @@
     input.setAttribute("autocorrect", "off");
     input.setAttribute("spellcheck", "false");
 
-    // Additional aggressive attributes
+    // Password manager ignore attributes
     input.setAttribute("data-lpignore", "true");
     input.setAttribute("data-form-type", "other");
     input.setAttribute("data-1p-ignore", "true");
     input.setAttribute("data-bwignore", "true");
 
-    // Randomize name and id frequently (but NOT for radio/checkbox buttons!)
-    const randomizeName = () => {
-      // Skip name randomization for radio/checkbox buttons to preserve grouping
-      if (input.type === "radio" || input.type === "checkbox") {
-        return;
-      }
+    // Only use name randomization on focus/blur, not constantly
+    let nameRandomized = false;
 
-      const randomSuffix = generateRandomString();
-      input.setAttribute("data-original-name", originalName);
-      input.setAttribute("data-original-id", originalId);
-      input.name = `${originalName}_${randomSuffix}`;
-      if (originalId) {
-        input.id = `${originalId}_${randomSuffix}`;
-      }
-    };
-
-    // Only randomize if not a radio or checkbox button
-    if (input.type !== "radio" && input.type !== "checkbox") {
-      randomizeName();
-    }
-
-    // Readonly technique with multiple triggers
-    const makeReadonly = () => {
-      input.setAttribute("readonly", "readonly");
-      input.readOnly = true;
-    };
-
-    const removeReadonly = () => {
-      input.removeAttribute("readonly");
-      input.readOnly = false;
-    };
-
-    // Gentle focus handling (no more stuttering!)
+    // Gentle focus handling - only randomize name when needed
     input.addEventListener("focus", function () {
-      // Only randomize name once per focus, not constantly (and not for radio/checkbox buttons)
+      // Only randomize name for text inputs, not radio/checkbox buttons
       if (
-        !this.hasAttribute("data-name-randomized") &&
+        !nameRandomized &&
         this.type !== "radio" &&
-        this.type !== "checkbox"
+        this.type !== "checkbox" &&
+        this.type !== "button" &&
+        this.type !== "submit"
       ) {
-        randomizeName();
-        this.setAttribute("data-name-randomized", "true");
+        const randomSuffix = generateRandomString();
+        this.setAttribute("data-original-name", originalName);
+        this.setAttribute("data-original-id", originalId);
+        this.name = `${originalName}_${randomSuffix}`;
+        if (originalId) {
+          this.id = `${originalId}_${randomSuffix}`;
+        }
+        nameRandomized = true;
       }
+
+      // Refresh autocomplete attribute
+      this.setAttribute("autocomplete", "off");
     });
 
     input.addEventListener("blur", function () {
@@ -95,13 +77,12 @@
       if (this.getAttribute("data-original-id")) {
         this.id = this.getAttribute("data-original-id");
       }
-      // Reset randomization flag for next focus
-      this.removeAttribute("data-name-randomized");
+      nameRandomized = false;
     });
 
-    // Aggressive input handling
+    // Aggressive input handling - cycle through autocomplete values
     input.addEventListener("input", function () {
-      // Constantly change autocomplete attribute
+      // Constantly change autocomplete attribute to confuse browsers
       const randomAutocomplete = [
         "new-password",
         "off",
@@ -117,39 +98,23 @@
           Math.floor(Math.random() * randomAutocomplete.length)
         ]
       );
-
-      // Only re-randomize name occasionally, not constantly (and not for radio/checkbox buttons)
-      if (
-        Math.random() > 0.95 &&
-        this.type !== "radio" &&
-        this.type !== "checkbox"
-      ) {
-        randomizeName();
-      }
     });
 
-    // Prevent right-click context menu autocomplete
-    input.addEventListener("contextmenu", function (e) {
-      e.preventDefault();
-      return false;
-    });
-
-    // Keyboard event interference
+    // Add keyboard event handling to block autocomplete triggers
     input.addEventListener("keydown", function (e) {
-      // Prevent arrow keys that might trigger autocomplete
+      // Only block arrow keys that might trigger autocomplete within our targeted forms
       if (e.key === "ArrowDown" || e.key === "ArrowUp") {
         e.stopPropagation();
       }
     });
 
-    // Skip initial readonly to prevent stuttering
-    // The other techniques should be sufficient
-
-    // Periodically re-apply attributes (every 2 seconds)
+    // Periodically re-apply attributes (every 3 seconds) for targeted inputs only
     setInterval(() => {
-      input.setAttribute("autocomplete", "off");
-      input.setAttribute("data-lpignore", "true");
-    }, 2000);
+      if (input.closest(FORM_SELECTOR)) {
+        input.setAttribute("autocomplete", "off");
+        input.setAttribute("data-lpignore", "true");
+      }
+    }, 3000);
   }
 
   /**
@@ -261,22 +226,22 @@
   }
 
   /**
-   * ULTRA-AGGRESSIVE CSS to obliterate any autocomplete UI
+   * Aggressive CSS to disable autocomplete - but ONLY for targeted forms
    */
   function injectAntiAutocompleteCSS() {
     const style = document.createElement("style");
     style.textContent = `
-            /* NUCLEAR OPTION: Hide ALL possible autocomplete dropdowns */
-            input:-webkit-autofill,
-            input:-webkit-autofill:hover,
-            input:-webkit-autofill:focus,
-            input:-webkit-autofill:active {
+            /* Target autofill ONLY in forms with autocomplete="off" */
+            form[autocomplete="off"] input:-webkit-autofill,
+            form[autocomplete="off"] input:-webkit-autofill:hover,
+            form[autocomplete="off"] input:-webkit-autofill:focus,
+            form[autocomplete="off"] input:-webkit-autofill:active {
                 -webkit-box-shadow: 0 0 0 30px white inset !important;
                 -webkit-text-fill-color: inherit !important;
                 transition: background-color 5000s ease-in-out 0s !important;
             }
             
-            /* Hide ALL browser suggestion UI elements */
+            /* Hide ALL browser suggestion UI elements in targeted forms */
             form[autocomplete="off"] input[list]::-webkit-calendar-picker-indicator,
             form[autocomplete="off"] input::-webkit-contacts-auto-fill-button,
             form[autocomplete="off"] input::-webkit-credentials-auto-fill-button,
@@ -293,14 +258,7 @@
                 opacity: 0 !important;
             }
             
-            /* Hide dropdown suggestions globally */
-            [role="listbox"],
-            [role="option"],
-            .autocomplete-suggestion,
-            .autocomplete-suggestions,
-            .ui-autocomplete,
-            .ui-menu,
-            datalist,
+            /* Hide dropdown suggestions in targeted forms */
             form[autocomplete="off"] datalist,
             form[autocomplete="off"] datalist option {
                 display: none !important;
@@ -312,7 +270,7 @@
                 pointer-events: none !important;
             }
             
-            /* Prevent any dropdown positioning */
+            /* Prevent dropdown positioning in targeted forms */
             form[autocomplete="off"] input {
                 position: relative !important;
             }
@@ -322,58 +280,59 @@
                 display: none !important;
             }
             
-            /* Hide Chrome's address autofill */
-            input[type="text"]::-webkit-contacts-auto-fill-button {
+            /* Hide Chrome's address autofill in targeted forms */
+            form[autocomplete="off"] input[type="text"]::-webkit-contacts-auto-fill-button {
                 position: absolute !important;
                 right: -1000px !important;
                 visibility: hidden !important;
             }
-            
-            /* Aggressive z-index manipulation */
-            form[autocomplete="off"] {
-                position: relative !important;
-            }
-            
-            /* Hide any floating suggestion panels */
-            div[style*="position: absolute"],
-            div[style*="position: fixed"] {
-                z-index: -1 !important;
-            }
-            
-            /* Target specific browser suggestion classes */
-            .chrome-autofill-suggestion,
-            .firefox-autofill-suggestion,
-            .safari-autofill-suggestion,
-            .edge-autofill-suggestion {
-                display: none !important;
-            }
         `;
     document.head.appendChild(style);
 
-    // Also inject a second style element as backup
+    // Add a second style element for additional browser-specific rules
     const backupStyle = document.createElement("style");
     backupStyle.textContent = `
-        /* BACKUP NUCLEAR CSS - Only target form inputs, not all elements */
+        /* Additional targeted rules for forms with autocomplete="off" */
         form[autocomplete="off"] input,
         form[autocomplete="off"] textarea {
             -webkit-user-modify: read-write-plaintext-only !important;
-            -webkit-appearance: none !important;
+        }
+        
+        /* Hide any autocomplete suggestion containers that appear near targeted forms */
+        form[autocomplete="off"] ~ div[style*="position: absolute"],
+        form[autocomplete="off"] ~ div[style*="position: fixed"] {
+            display: none !important;
         }
     `;
     document.head.appendChild(backupStyle);
   }
 
   /**
-   * NUCLEAR OPTION: Global event interception
+   * Targeted aggressive event handling - only for forms with autocomplete="off"
    */
-  function interceptAutocompleteEvents() {
-    // Intercept all keydown events globally
+  function setupTargetedEventHandling() {
+    // Handle focus events for targeted forms only
+    document.addEventListener("focusin", function (e) {
+      const target = e.target;
+      if (
+        target &&
+        target.closest &&
+        target.closest(FORM_SELECTOR) &&
+        (target.tagName === "INPUT" || target.tagName === "TEXTAREA")
+      ) {
+        // Aggressively reset autocomplete attributes
+        target.setAttribute("autocomplete", "off");
+        target.setAttribute("autocomplete", "new-password");
+      }
+    });
+
+    // Handle keydown events but only for targeted forms
     document.addEventListener(
       "keydown",
       function (e) {
         const target = e.target;
         if (target && target.closest && target.closest(FORM_SELECTOR)) {
-          // Block arrow keys that trigger autocomplete
+          // Block arrow keys that trigger autocomplete, but only in our targeted forms
           if (e.key === "ArrowDown" || e.key === "ArrowUp") {
             e.preventDefault();
             e.stopPropagation();
@@ -385,44 +344,19 @@
       true
     );
 
-    // Intercept focus events (gentler approach)
-    document.addEventListener(
-      "focusin",
-      function (e) {
-        const target = e.target;
-        if (
-          target &&
-          target.closest &&
-          target.closest(FORM_SELECTOR) &&
-          (target.tagName === "INPUT" || target.tagName === "TEXTAREA")
-        ) {
-          // Just reset autocomplete attributes, no blur/focus disruption
-          target.setAttribute("autocomplete", "off");
-          target.setAttribute("autocomplete", "new-password");
-        }
-      },
-      true
-    );
-
-    // Block all autocomplete-related events
-    ["input", "change", "keyup", "keypress"].forEach((eventType) => {
-      document.addEventListener(
-        eventType,
-        function (e) {
-          const target = e.target;
-          if (
-            target &&
-            target.closest &&
-            target.closest(FORM_SELECTOR) &&
-            (target.tagName === "INPUT" || target.tagName === "TEXTAREA")
-          ) {
-            // Constantly reset autocomplete
-            target.setAttribute("autocomplete", "off");
-            target.setAttribute("autocomplete", "new-password");
-          }
-        },
-        true
-      );
+    // Handle input events for targeted forms
+    document.addEventListener("input", function (e) {
+      const target = e.target;
+      if (
+        target &&
+        target.closest &&
+        target.closest(FORM_SELECTOR) &&
+        (target.tagName === "INPUT" || target.tagName === "TEXTAREA")
+      ) {
+        // Constantly reset autocomplete for targeted inputs
+        target.setAttribute("autocomplete", "off");
+        target.setAttribute("autocomplete", "new-password");
+      }
     });
   }
 
@@ -431,21 +365,20 @@
     document.addEventListener("DOMContentLoaded", function () {
       initializeAutocompleteDisabler();
       injectAntiAutocompleteCSS();
-      interceptAutocompleteEvents();
+      setupTargetedEventHandling();
     });
   } else {
     initializeAutocompleteDisabler();
     injectAntiAutocompleteCSS();
-    interceptAutocompleteEvents();
+    setupTargetedEventHandling();
   }
 
   // Also run immediately in case the script loads after DOMContentLoaded
   setTimeout(() => {
     initializeAutocompleteDisabler();
-    interceptAutocompleteEvents();
   }, 100);
 
-  // Run periodically to catch any new elements
+  // Run periodically to catch any new elements (back to 5s for effectiveness)
   setInterval(() => {
     initializeAutocompleteDisabler();
   }, 5000);
