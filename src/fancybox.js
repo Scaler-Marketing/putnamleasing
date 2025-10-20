@@ -238,10 +238,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // Add data-thumbnail attribute to img for CSS targeting
       img.setAttribute("data-thumbnail", "true");
 
-      // console.log(`✅ Auto-fixed thumbnail ${index}:`, {
-      //   "data-src": actualImageUrl,
-      //   "data-thumb": thumbUrl,
-      // });
+      // console.log(`✅ Auto-fixed thumbnail ${index}:`, { "data-src": actualImageUrl, "data-thumb": thumbUrl });
     } else {
       // console.warn(`⚠️ No img element or src found in thumbnail ${index}`);
     }
@@ -752,8 +749,219 @@ document.addEventListener("DOMContentLoaded", function () {
     // Add cursor pointer to main image
     mainImage.style.cursor = "pointer";
 
-    // console.log("✅ Main image navigation arrows and click handler added");
-    // console.log("💡 Use arrow buttons or keyboard arrows to navigate images");
+    // ========================================
+    // MAIN IMAGE SWIPE/DRAG FUNCTIONALITY
+    // ========================================
+
+    // Variables for main image swipe/drag
+    let mainImageIsDown = false;
+    let mainImageStartX = 0;
+    let mainImageCurrentX = 0;
+    let mainImageStartTime = 0;
+    let mainImageIsDragging = false;
+
+    // Touch variables for mobile
+    let mainImageTouchStartX = 0;
+    let mainImageTouchCurrentX = 0;
+    let mainImageTouchStartTime = 0;
+    let mainImageIsTouching = false;
+    let mainImageHasTouchSwiped = false;
+
+    // console.log("👆 Adding swipe/drag functionality to main image...");
+
+    // Desktop mouse events for main image
+    mainImage.addEventListener("mousedown", (e) => {
+      // Don't interfere with arrow clicks
+      if (
+        e.target.classList.contains("main-image-arrow") ||
+        e.target.closest(".main-image-arrow")
+      ) {
+        return;
+      }
+
+      mainImageIsDown = true;
+      mainImageDragged = false;
+      mainImageIsDragging = false;
+      mainImage.style.cursor = "grabbing";
+
+      mainImageStartX = e.pageX;
+      mainImageCurrentX = e.pageX;
+      mainImageStartTime = Date.now();
+
+      // console.log("🖱️ Main image drag started");
+      e.preventDefault();
+    });
+
+    // Global mouse move for main image
+    document.addEventListener("mousemove", (e) => {
+      if (!mainImageIsDown) return;
+
+      mainImageCurrentX = e.pageX;
+      const distance = Math.abs(mainImageCurrentX - mainImageStartX);
+
+      // Start dragging if moved more than threshold
+      if (distance > CONFIG.GALLERY.dragThreshold && !mainImageIsDragging) {
+        mainImageIsDragging = true;
+        mainImageDragged = true;
+        // console.log("🎯 Main image dragging started");
+      }
+
+      if (mainImageIsDragging) {
+        e.preventDefault();
+        // Visual feedback - slightly reduce opacity while dragging
+        mainImage.style.opacity = "0.8";
+      }
+    });
+
+    // Global mouse up for main image
+    document.addEventListener("mouseup", (e) => {
+      if (!mainImageIsDown) return;
+
+      mainImageIsDown = false;
+      mainImageIsDragging = false;
+      mainImage.style.cursor = "pointer";
+      mainImage.style.opacity = "1";
+
+      // Handle swipe navigation if we dragged
+      if (mainImageDragged) {
+        const endTime = Date.now();
+        const timeDiff = endTime - mainImageStartTime;
+        const totalDistance = mainImageCurrentX - mainImageStartX;
+        const velocity = Math.abs(totalDistance) / timeDiff;
+
+        // console.log(`🖱️ Main image drag ended: distance=${totalDistance}, time=${timeDiff}, velocity=${velocity}`);
+
+        // Navigate based on swipe direction and velocity
+        if (
+          Math.abs(totalDistance) > 50 ||
+          (velocity > 0.5 && timeDiff < 300)
+        ) {
+          if (totalDistance > 0 && currentIndex > 0) {
+            // Swiped right - go to previous image
+            // console.log("⬅️ Swiped right on main image - previous");
+            updateMainImage(currentIndex - 1);
+            updateArrowStates();
+          } else if (
+            totalDistance < 0 &&
+            currentIndex < thumbnails.length - 1
+          ) {
+            // Swiped left - go to next image
+            // console.log("➡️ Swiped left on main image - next");
+            updateMainImage(currentIndex + 1);
+            updateArrowStates();
+          }
+        }
+      }
+
+      // Reset drag state after delay
+      setTimeout(() => {
+        mainImageDragged = false;
+      }, 150);
+    });
+
+    // Touch events for main image (mobile)
+    mainImage.addEventListener(
+      "touchstart",
+      (e) => {
+        // Don't interfere with arrow clicks
+        if (
+          e.target.classList.contains("main-image-arrow") ||
+          e.target.closest(".main-image-arrow")
+        ) {
+          return;
+        }
+
+        mainImageIsTouching = true;
+        mainImageHasTouchSwiped = false;
+
+        mainImageTouchStartX = e.touches[0].pageX;
+        mainImageTouchCurrentX = e.touches[0].pageX;
+        mainImageTouchStartTime = Date.now();
+
+        // console.log("📱 Main image touch started");
+      },
+      { passive: false }
+    );
+
+    mainImage.addEventListener(
+      "touchmove",
+      (e) => {
+        if (!mainImageIsTouching) return;
+
+        mainImageTouchCurrentX = e.touches[0].pageX;
+        const distance = Math.abs(
+          mainImageTouchCurrentX - mainImageTouchStartX
+        );
+
+        // Use mobile drag threshold
+        if (distance > CONFIG.GALLERY.mobileDragThreshold) {
+          mainImageHasTouchSwiped = true;
+          e.preventDefault(); // Prevent page scroll
+
+          // Visual feedback
+          mainImage.style.opacity = "0.8";
+
+          // console.log(`📱 Main image touch swiping: distance=${distance}`);
+        }
+      },
+      { passive: false }
+    );
+
+    mainImage.addEventListener(
+      "touchend",
+      (e) => {
+        if (!mainImageIsTouching) return;
+
+        mainImageIsTouching = false;
+        mainImage.style.opacity = "1";
+
+        // Handle swipe navigation
+        if (mainImageHasTouchSwiped) {
+          const endTime = Date.now();
+          const timeDiff = endTime - mainImageTouchStartTime;
+          const totalDistance = mainImageTouchCurrentX - mainImageTouchStartX;
+          const velocity = Math.abs(totalDistance) / timeDiff;
+
+          // console.log(`📱 Main image touch ended: distance=${totalDistance}, time=${timeDiff}, velocity=${velocity}`);
+
+          // Navigate based on swipe direction and velocity
+          if (
+            Math.abs(totalDistance) > 30 ||
+            (velocity > 0.3 && timeDiff < 300)
+          ) {
+            if (totalDistance > 0 && currentIndex > 0) {
+              // Swiped right - go to previous image
+              // console.log("⬅️ Touch swiped right on main image - previous");
+              updateMainImage(currentIndex - 1);
+              updateArrowStates();
+            } else if (
+              totalDistance < 0 &&
+              currentIndex < thumbnails.length - 1
+            ) {
+              // Swiped left - go to next image
+              // console.log("➡️ Touch swiped left on main image - next");
+              updateMainImage(currentIndex + 1);
+              updateArrowStates();
+            }
+          }
+
+          // Update mainImageDragged to prevent click handler
+          mainImageDragged = true;
+        }
+
+        // Reset touch swipe state after delay
+        setTimeout(() => {
+          mainImageHasTouchSwiped = false;
+          mainImageDragged = false;
+        }, 150);
+
+        // console.log("📱 Main image touch ended");
+      },
+      { passive: false }
+    );
+
+    // console.log("✅ Main image swipe/drag functionality added");
+    // console.log("💡 Swipe left/right on main image to navigate, or use arrow buttons/keyboard");
   }
 
   // ========================================
@@ -1003,7 +1211,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let touchStartX = 0;
     let touchCurrentX = 0;
     let touchScrollLeft = 0;
-    let touchStartTime = 0;
+    let carouselTouchStartTime = 0;
     let isTouching = false;
     // hasTouchDragged is now declared at the top of the script
 
@@ -1018,7 +1226,7 @@ document.addEventListener("DOMContentLoaded", function () {
         touchStartX = e.touches[0].pageX;
         touchCurrentX = e.touches[0].pageX;
         touchScrollLeft = thumbnailContainer.scrollLeft;
-        touchStartTime = Date.now();
+        carouselTouchStartTime = Date.now();
 
         // console.log("📱 Swiper touch started at:", touchStartX);
       },
@@ -1066,7 +1274,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Add momentum scrolling for touch
         if (hasTouchDragged) {
           const endTime = Date.now();
-          const timeDiff = endTime - touchStartTime;
+          const timeDiff = endTime - carouselTouchStartTime;
           const totalDistance = touchCurrentX - touchStartX;
           const velocity = totalDistance / timeDiff;
 
