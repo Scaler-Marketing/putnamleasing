@@ -602,7 +602,7 @@ document.addEventListener("DOMContentLoaded", function () {
         font-size: ${CONFIG.ARROWS.fontSize};
         font-weight: bold;
         cursor: pointer;
-        opacity: ${CONFIG.ARROWS.activeOpacity};
+        opacity: 0;
         transition: ${CONFIG.ARROWS.transition};
         z-index: 10;
         user-select: none;
@@ -628,7 +628,7 @@ document.addEventListener("DOMContentLoaded", function () {
         font-size: ${CONFIG.ARROWS.fontSize};
         font-weight: bold;
         cursor: pointer;
-        opacity: ${CONFIG.ARROWS.activeOpacity};
+        opacity: 0;
         transition: ${CONFIG.ARROWS.transition};
         z-index: 10;
         user-select: none;
@@ -640,26 +640,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
     /**
      * Updates arrow states based on current gallery position
+     * Note: Arrows are now hidden by default and only shown on hover
      */
     function updateArrowStates() {
       if (thumbnails.length <= 1) {
-        leftArrow.style.opacity = "0";
-        rightArrow.style.opacity = "0";
+        // Hide arrows completely if only one image
+        leftArrow.style.display = "none";
+        rightArrow.style.display = "none";
         return;
+      } else {
+        // Show arrows (they'll be controlled by hover)
+        leftArrow.style.display = "flex";
+        rightArrow.style.display = "flex";
       }
 
-      // Left arrow: disabled at first image
-      leftArrow.style.opacity =
-        currentIndex > 0
-          ? CONFIG.ARROWS.activeOpacity
-          : CONFIG.ARROWS.disabledOpacity;
+      // Update cursor states based on navigation availability
       leftArrow.style.cursor = currentIndex > 0 ? "pointer" : "not-allowed";
-
-      // Right arrow: disabled at last image
-      rightArrow.style.opacity =
-        currentIndex < thumbnails.length - 1
-          ? CONFIG.ARROWS.activeOpacity
-          : CONFIG.ARROWS.disabledOpacity;
       rightArrow.style.cursor =
         currentIndex < thumbnails.length - 1 ? "pointer" : "not-allowed";
     }
@@ -667,7 +663,28 @@ document.addEventListener("DOMContentLoaded", function () {
     // Initialize arrow states
     updateArrowStates();
 
-    // Arrow hover effects
+    // Main image wrapper hover effects to show/hide arrows
+    mainImageWrapper.addEventListener("mouseenter", () => {
+      if (thumbnails.length > 1) {
+        // Show arrows with appropriate opacity based on navigation state
+        leftArrow.style.opacity =
+          currentIndex > 0
+            ? CONFIG.ARROWS.activeOpacity
+            : CONFIG.ARROWS.disabledOpacity;
+        rightArrow.style.opacity =
+          currentIndex < thumbnails.length - 1
+            ? CONFIG.ARROWS.activeOpacity
+            : CONFIG.ARROWS.disabledOpacity;
+      }
+    });
+
+    mainImageWrapper.addEventListener("mouseleave", () => {
+      // Hide arrows when cursor leaves main image area
+      leftArrow.style.opacity = "0";
+      rightArrow.style.opacity = "0";
+    });
+
+    // Arrow hover effects (background color changes)
     leftArrow.addEventListener("mouseenter", () => {
       leftArrow.style.background = CONFIG.ARROWS.backgroundHover;
     });
