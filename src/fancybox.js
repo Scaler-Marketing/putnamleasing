@@ -108,6 +108,8 @@ const CONFIG = {
     showClass: "fancybox-fadeIn", // Fancybox open animation
     hideClass: "fancybox-fadeOut", // Fancybox close animation
     overlayColor: "rgba(0, 0, 0, 0.95)", // Dark overlay color (supports rgba, hex, hsl, etc.)
+    enableUrlHash: true, // Enable URL hash/deep linking for images (e.g., #car-gallery-3)
+    arrowHoverColor: "#e41837", // Lightbox arrow hover background color
   },
 };
 
@@ -408,7 +410,8 @@ document.addEventListener("DOMContentLoaded", function () {
    * @param {number} startIndex - Starting index
    */
   function openFancyboxWithSync(items, startIndex) {
-    const fancyboxInstance = Fancybox.show(items, {
+    // Build Fancybox options
+    const fancyboxOptions = {
       startIndex: startIndex,
       Toolbar: {
         display: CONFIG.FANCYBOX.toolbar,
@@ -417,6 +420,13 @@ document.addEventListener("DOMContentLoaded", function () {
         "Carousel.change": (fancybox, carousel, slideIndex) => {
           // console.log(`🔄 Fancybox slide changed to index: ${slideIndex}`);
           updateMainImage(slideIndex);
+
+          // Manual hash management if enabled
+          if (CONFIG.FANCYBOX.enableUrlHash) {
+            const hashValue = `${CONFIG.GALLERY.name}-${slideIndex + 1}`;
+            // console.log(`🔗 Updating URL hash to: #${hashValue}`);
+            window.history.replaceState(null, null, `#${hashValue}`);
+          }
         },
         close: (fancybox) => {
           const currentSlide = fancybox.getSlide();
@@ -424,9 +434,41 @@ document.addEventListener("DOMContentLoaded", function () {
             // console.log(`🔒 Fancybox closed at index: ${currentSlide.index}`);
             updateMainImage(currentSlide.index);
           }
+
+          // Clear hash when closing if enabled
+          if (CONFIG.FANCYBOX.enableUrlHash) {
+            // console.log(`🔗 Clearing URL hash`);
+            window.history.replaceState(
+              null,
+              null,
+              window.location.pathname + window.location.search
+            );
+          }
+        },
+        ready: (fancybox) => {
+          // Set initial hash when lightbox opens
+          if (CONFIG.FANCYBOX.enableUrlHash) {
+            const initialIndex = fancybox.getSlide()?.index || startIndex;
+            const hashValue = `${CONFIG.GALLERY.name}-${initialIndex + 1}`;
+            // console.log(`🔗 Setting initial URL hash to: #${hashValue}`);
+            window.history.replaceState(null, null, `#${hashValue}`);
+          }
         },
       },
-    });
+    };
+
+    // Try to add Hash plugin if available (fallback to manual implementation above)
+    if (CONFIG.FANCYBOX.enableUrlHash && typeof Fancybox.Hash !== "undefined") {
+      fancyboxOptions.Hash = {
+        auto: true,
+        gallery: CONFIG.GALLERY.name,
+      };
+      // console.log(`🔗 Using Fancybox Hash plugin`);
+    } else if (CONFIG.FANCYBOX.enableUrlHash) {
+      // console.log(`🔗 Using manual hash implementation`);
+    }
+
+    const fancyboxInstance = Fancybox.show(items, fancyboxOptions);
     return fancyboxInstance;
   }
 
@@ -567,6 +609,42 @@ document.addEventListener("DOMContentLoaded", function () {
   // console.log("✅ All thumbnail click handlers added");
 
   // ========================================
+  // URL HASH HANDLING FOR DEEP LINKING
+  // ========================================
+
+  // Handle direct URL access with hash (e.g., #car-gallery-5)
+  if (CONFIG.FANCYBOX.enableUrlHash && window.location.hash) {
+    const hash = window.location.hash.substring(1); // Remove the #
+    const galleryPrefix = `${CONFIG.GALLERY.name}-`;
+
+    if (hash.startsWith(galleryPrefix)) {
+      const imageNumber = parseInt(hash.replace(galleryPrefix, ""));
+      const imageIndex = imageNumber - 1; // Convert to 0-based index
+
+      if (imageIndex >= 0 && imageIndex < thumbnails.length) {
+        // console.log(`🔗 Opening lightbox from URL hash: ${hash} (index: ${imageIndex})`);
+
+        // Update main image first
+        updateMainImage(imageIndex);
+
+        // Small delay to ensure everything is loaded, then open lightbox
+        setTimeout(() => {
+          const fancyboxItems = Array.from(thumbnails).map((thumb, i) => {
+            const src =
+              thumb.getAttribute("data-src") || thumb.querySelector("img")?.src;
+            return {
+              src: src,
+              type: "image",
+            };
+          });
+
+          openFancyboxWithSync(fancyboxItems, imageIndex);
+        }, 100);
+      }
+    }
+  }
+
+  // ========================================
   // MAIN IMAGE NAVIGATION ARROWS
   // ========================================
 
@@ -584,7 +662,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Create left arrow
     const leftArrow = document.createElement("div");
-    leftArrow.innerHTML = "&#8249;"; // Left chevron
+    leftArrow.innerHTML = `
+      <div class="button_icon-wrapper icon-1x1-small">
+        <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 32 32" fill="none" class="button_icon icon-1x1-small" style="transform: rotate(180deg);">
+          <path d="M5.33203 16H14.6654C15.4017 16 15.9987 16.597 15.9987 17.3334V23.4478C15.9987 24.6356 17.4349 25.2305 18.2748 24.3906L24.7797 17.8857C25.8211 16.8443 25.8211 15.1558 24.7797 14.1144L18.2748 7.60952C17.4349 6.76957 15.9987 7.36445 15.9987 8.55233V10.6667" stroke="currentColor" stroke-width="2"></path>
+        </svg>
+      </div>
+    `;
     leftArrow.className = "main-image-arrow main-image-arrow-left";
     leftArrow.style.cssText = `
         position: absolute;
@@ -610,7 +694,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Create right arrow
     const rightArrow = document.createElement("div");
-    rightArrow.innerHTML = "&#8250;"; // Right chevron
+    rightArrow.innerHTML = `
+      <div class="button_icon-wrapper icon-1x1-small">
+        <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 32 32" fill="none" class="button_icon icon-1x1-small">
+          <path d="M5.33203 16H14.6654C15.4017 16 15.9987 16.597 15.9987 17.3334V23.4478C15.9987 24.6356 17.4349 25.2305 18.2748 24.3906L24.7797 17.8857C25.8211 16.8443 25.8211 15.1558 24.7797 14.1144L18.2748 7.60952C17.4349 6.76957 15.9987 7.36445 15.9987 8.55233V10.6667" stroke="currentColor" stroke-width="2"></path>
+        </svg>
+      </div>
+    `;
     rightArrow.className = "main-image-arrow main-image-arrow-right";
     rightArrow.style.cssText = `
         position: absolute;
@@ -981,7 +1071,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Create left arrow for thumbnails
     const thumbnailLeftArrow = document.createElement("div");
-    thumbnailLeftArrow.innerHTML = "&#8249;"; // Left chevron
+    thumbnailLeftArrow.innerHTML = `
+      <div class="button_icon-wrapper icon-1x1-small">
+        <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 32 32" fill="none" class="button_icon icon-1x1-small" style="transform: rotate(180deg);">
+          <path d="M5.33203 16H14.6654C15.4017 16 15.9987 16.597 15.9987 17.3334V23.4478C15.9987 24.6356 17.4349 25.2305 18.2748 24.3906L24.7797 17.8857C25.8211 16.8443 25.8211 15.1558 24.7797 14.1144L18.2748 7.60952C17.4349 6.76957 15.9987 7.36445 15.9987 8.55233V10.6667" stroke="currentColor" stroke-width="2"></path>
+        </svg>
+      </div>
+    `;
     thumbnailLeftArrow.className =
       "thumbnail-carousel-arrow thumbnail-carousel-arrow-left";
     thumbnailLeftArrow.style.cssText = `
@@ -1008,7 +1104,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Create right arrow for thumbnails
     const thumbnailRightArrow = document.createElement("div");
-    thumbnailRightArrow.innerHTML = "&#8250;"; // Right chevron
+    thumbnailRightArrow.innerHTML = `
+      <div class="button_icon-wrapper icon-1x1-small">
+        <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 32 32" fill="none" class="button_icon icon-1x1-small">
+          <path d="M5.33203 16H14.6654C15.4017 16 15.9987 16.597 15.9987 17.3334V23.4478C15.9987 24.6356 17.4349 25.2305 18.2748 24.3906L24.7797 17.8857C25.8211 16.8443 25.8211 15.1558 24.7797 14.1144L18.2748 7.60952C17.4349 6.76957 15.9987 7.36445 15.9987 8.55233V10.6667" stroke="currentColor" stroke-width="2"></path>
+        </svg>
+      </div>
+    `;
     thumbnailRightArrow.className =
       "thumbnail-carousel-arrow thumbnail-carousel-arrow-right";
     thumbnailRightArrow.style.cssText = `
@@ -1236,6 +1338,24 @@ document.addEventListener("DOMContentLoaded", function () {
         /* Fancybox Overlay Color Customization */
         .fancybox__backdrop {
           background-color: ${CONFIG.FANCYBOX.overlayColor} !important;
+        }
+        
+        /* Fancybox Lightbox Arrow Hover Effects */
+        .fancybox__nav .fancybox__button:hover {
+          background-color: ${CONFIG.FANCYBOX.arrowHoverColor} !important;
+        }
+        
+        /* Alternative selectors for different Fancybox versions */
+        .fancybox__button--prev:hover,
+        .fancybox__button--next:hover {
+          background-color: ${CONFIG.FANCYBOX.arrowHoverColor} !important;
+        }
+        
+        /* Ensure smooth transition for arrow hover */
+        .fancybox__nav .fancybox__button,
+        .fancybox__button--prev,
+        .fancybox__button--next {
+          transition: background-color 0.3s ease !important;
         }
       `;
     document.head.appendChild(scrollbarStyle);
