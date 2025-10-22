@@ -66,7 +66,7 @@ const CONFIG = {
     size: "40px", // Arrow button size
     position: "15px", // Distance from image edges
     background: "rgba(0, 0, 0, 0.6)", // Arrow background color
-    backgroundHover: "rgba(0, 0, 0, 0.8)", // Arrow hover background
+    backgroundHover: "#e41837", // Arrow hover background
     color: "white", // Arrow icon color
     fontSize: "24px", // Arrow icon size
     activeOpacity: "1", // Active arrow opacity
@@ -107,6 +107,7 @@ const CONFIG = {
     enableZoom: true, // Enable image zoom
     showClass: "fancybox-fadeIn", // Fancybox open animation
     hideClass: "fancybox-fadeOut", // Fancybox close animation
+    overlayColor: "rgba(0, 0, 0, 0.95)", // Dark overlay color (supports rgba, hex, hsl, etc.)
   },
 };
 
@@ -494,7 +495,7 @@ document.addEventListener("DOMContentLoaded", function () {
       e.preventDefault();
       e.stopPropagation();
 
-      // Update main image first
+      // Update main image only (no lightbox opening)
       // console.log(`🖼️ Updating main image to index ${index}`);
       updateMainImage(index);
 
@@ -503,22 +504,8 @@ document.addEventListener("DOMContentLoaded", function () {
         updateArrowStates();
       }
 
-      // Then open Fancybox lightbox
-      // console.log(`🚀 Opening Fancybox at index ${index}...`);
-
-      // Create array of all images for Fancybox
-      const fancyboxItems = Array.from(thumbnails).map((thumb, i) => {
-        const src =
-          thumb.getAttribute("data-src") || thumb.querySelector("img")?.src;
-        return {
-          src: src,
-          type: "image",
-          caption: `Image ${i + 1} of ${thumbnails.length}`,
-        };
-      });
-
-      // Open Fancybox starting at clicked image with sync
-      openFancyboxWithSync(fancyboxItems, index);
+      // Note: Lightbox opening removed per client request
+      // Thumbnails now only update the main image display
     });
 
     // Add double-click handler to open Fancybox
@@ -534,7 +521,6 @@ document.addEventListener("DOMContentLoaded", function () {
         return {
           src: src,
           type: "image",
-          caption: `Image ${i + 1} of ${thumbnails.length}`,
         };
       });
 
@@ -738,7 +724,6 @@ document.addEventListener("DOMContentLoaded", function () {
         return {
           src: src,
           type: "image",
-          caption: `Image ${i + 1} of ${thumbnails.length}`,
         };
       });
 
@@ -965,6 +950,160 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // ========================================
+  // THUMBNAIL CAROUSEL NAVIGATION ARROWS
+  // ========================================
+
+  // Add navigation arrows to thumbnail carousel
+  if (thumbnailContainer && thumbnails.length > 4) {
+    // console.log("🎠 Adding navigation arrows to thumbnail carousel...");
+
+    const thumbnailWrapper = thumbnailContainer.parentElement;
+
+    // Make wrapper relative for absolute positioning of arrows
+    thumbnailWrapper.style.position = "relative";
+
+    // Create left arrow for thumbnails
+    const thumbnailLeftArrow = document.createElement("div");
+    thumbnailLeftArrow.innerHTML = "&#8249;"; // Left chevron
+    thumbnailLeftArrow.className =
+      "thumbnail-carousel-arrow thumbnail-carousel-arrow-left";
+    thumbnailLeftArrow.style.cssText = `
+        position: absolute;
+        left: 5px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: ${CONFIG.ARROWS.background};
+        color: ${CONFIG.ARROWS.color};
+        width: ${CONFIG.ARROWS.size};
+        height: ${CONFIG.ARROWS.size};
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: ${CONFIG.ARROWS.fontSize};
+        font-weight: bold;
+        cursor: pointer;
+        opacity: ${CONFIG.ARROWS.activeOpacity};
+        transition: ${CONFIG.ARROWS.transition};
+        z-index: 15;
+        user-select: none;
+      `;
+
+    // Create right arrow for thumbnails
+    const thumbnailRightArrow = document.createElement("div");
+    thumbnailRightArrow.innerHTML = "&#8250;"; // Right chevron
+    thumbnailRightArrow.className =
+      "thumbnail-carousel-arrow thumbnail-carousel-arrow-right";
+    thumbnailRightArrow.style.cssText = `
+        position: absolute;
+        right: 5px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: ${CONFIG.ARROWS.background};
+        color: ${CONFIG.ARROWS.color};
+        width: ${CONFIG.ARROWS.size};
+        height: ${CONFIG.ARROWS.size};
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: ${CONFIG.ARROWS.fontSize};
+        font-weight: bold;
+        cursor: pointer;
+        opacity: ${CONFIG.ARROWS.activeOpacity};
+        transition: ${CONFIG.ARROWS.transition};
+        z-index: 15;
+        user-select: none;
+      `;
+
+    // Add arrows to wrapper
+    thumbnailWrapper.appendChild(thumbnailLeftArrow);
+    thumbnailWrapper.appendChild(thumbnailRightArrow);
+
+    /**
+     * Updates thumbnail carousel arrow states based on scroll position
+     */
+    function updateThumbnailArrowStates() {
+      const scrollLeft = thumbnailContainer.scrollLeft;
+      const maxScroll =
+        thumbnailContainer.scrollWidth - thumbnailContainer.clientWidth;
+
+      // Left arrow: disabled when at start
+      thumbnailLeftArrow.style.opacity =
+        scrollLeft > 10
+          ? CONFIG.ARROWS.activeOpacity
+          : CONFIG.ARROWS.disabledOpacity;
+      thumbnailLeftArrow.style.cursor =
+        scrollLeft > 10 ? "pointer" : "not-allowed";
+
+      // Right arrow: disabled when at end
+      thumbnailRightArrow.style.opacity =
+        scrollLeft < maxScroll - 10
+          ? CONFIG.ARROWS.activeOpacity
+          : CONFIG.ARROWS.disabledOpacity;
+      thumbnailRightArrow.style.cursor =
+        scrollLeft < maxScroll - 10 ? "pointer" : "not-allowed";
+    }
+
+    // Initialize thumbnail arrow states
+    updateThumbnailArrowStates();
+
+    // Update arrow states on scroll
+    thumbnailContainer.addEventListener("scroll", updateThumbnailArrowStates);
+
+    // Thumbnail arrow hover effects
+    thumbnailLeftArrow.addEventListener("mouseenter", () => {
+      thumbnailLeftArrow.style.background = CONFIG.ARROWS.backgroundHover;
+    });
+
+    thumbnailLeftArrow.addEventListener("mouseleave", () => {
+      thumbnailLeftArrow.style.background = CONFIG.ARROWS.background;
+    });
+
+    thumbnailRightArrow.addEventListener("mouseenter", () => {
+      thumbnailRightArrow.style.background = CONFIG.ARROWS.backgroundHover;
+    });
+
+    thumbnailRightArrow.addEventListener("mouseleave", () => {
+      thumbnailRightArrow.style.background = CONFIG.ARROWS.background;
+    });
+
+    // Thumbnail arrow click handlers
+    thumbnailLeftArrow.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (thumbnailContainer.scrollLeft > 10) {
+        // console.log("⬅️ Thumbnail left arrow clicked");
+        const scrollAmount = thumbnailContainer.clientWidth * 0.8; // Scroll 80% of visible width
+        thumbnailContainer.scrollTo({
+          left: Math.max(0, thumbnailContainer.scrollLeft - scrollAmount),
+          behavior: CONFIG.ANIMATIONS.scrollBehavior,
+        });
+      }
+    });
+
+    thumbnailRightArrow.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const maxScroll =
+        thumbnailContainer.scrollWidth - thumbnailContainer.clientWidth;
+      if (thumbnailContainer.scrollLeft < maxScroll - 10) {
+        // console.log("➡️ Thumbnail right arrow clicked");
+        const scrollAmount = thumbnailContainer.clientWidth * 0.8; // Scroll 80% of visible width
+        thumbnailContainer.scrollTo({
+          left: Math.min(
+            maxScroll,
+            thumbnailContainer.scrollLeft + scrollAmount
+          ),
+          behavior: CONFIG.ANIMATIONS.scrollBehavior,
+        });
+      }
+    });
+
+    // console.log("✅ Thumbnail carousel navigation arrows added");
+  } else if (thumbnails.length <= 4) {
+    // console.log("ℹ️ Skipping thumbnail arrows - not enough thumbnails to require scrolling");
+  }
+
+  // ========================================
   // KEYBOARD NAVIGATION
   // ========================================
 
@@ -1001,7 +1140,6 @@ document.addEventListener("DOMContentLoaded", function () {
             return {
               src: src,
               type: "image",
-              caption: `Image ${i + 1} of ${thumbnails.length}`,
             };
           });
           openFancyboxWithSync(fancyboxItems, currentIndex);
@@ -1076,6 +1214,11 @@ document.addEventListener("DOMContentLoaded", function () {
         /* Hover state for inactive thumbnails only */
         .lightbox_mini-image:hover img:not(.is-active) {
           border: ${CONFIG.THUMBNAILS.borderWidth} ${CONFIG.THUMBNAILS.borderStyle} ${CONFIG.THUMBNAILS.hoverBorderColor} !important;
+        }
+        
+        /* Fancybox Overlay Color Customization */
+        .fancybox__backdrop {
+          background-color: ${CONFIG.FANCYBOX.overlayColor} !important;
         }
       `;
     document.head.appendChild(scrollbarStyle);
@@ -1370,7 +1513,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const fancyboxItems = Array.from(thumbnails).map((thumb, i) => ({
           src: thumb.getAttribute("data-src"),
           type: "image",
-          caption: `Image ${i + 1} of ${thumbnails.length}`,
         }));
         openFancyboxWithSync(fancyboxItems, current);
       }
@@ -1390,3 +1532,4 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // console.log("🔧 Utility functions exposed as window.FancyboxCarousel");
 });
+
